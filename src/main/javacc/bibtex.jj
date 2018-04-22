@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jbibtex.policies.BibTeXEntryKeyConflictResolutionPolicy;
+import org.jbibtex.policies.BibTeXEntryKeyConflictResolutionPolicies;
+
 public class BibTeXParser {
 
 	private KeyMap<BibTeXString> macros = new KeyMap<BibTeXString>();
@@ -28,9 +31,17 @@ public class BibTeXParser {
 
 	private long id = 1L;
 
+	private BibTeXEntryKeyConflictResolutionPolicy databaseEntryKeyConflictResolutionPolicy = null;
+
 
 	public BibTeXParser() throws ParseException, TokenMgrException {
+		this(BibTeXEntryKeyConflictResolutionPolicies.IGNORE_SUBSEQUENT);
+	}
+
+	public BibTeXParser(BibTeXEntryKeyConflictResolutionPolicy policy) throws ParseException, TokenMgrException {
 		this("");
+
+		databaseEntryKeyConflictResolutionPolicy = policy;
 
 		// Default macros
 		addMacro("jan", "January");
@@ -334,7 +345,7 @@ TOKEN :
 
 private BibTeXDatabase Database(boolean performErrorRecovery) :
 {
-	BibTeXDatabase database = new BibTeXDatabase();
+	BibTeXDatabase database = new BibTeXDatabase(databaseEntryKeyConflictResolutionPolicy);
 
 	BibTeXObject object = null;
 }
@@ -438,7 +449,7 @@ private BibTeXInclude Include():
 			Reader reader = new FileReader(string);
 
 			try {
-				BibTeXParser parser = new BibTeXParser();
+				BibTeXParser parser = new BibTeXParser(databaseEntryKeyConflictResolutionPolicy);
 
 				database = parser.parse(reader);
 			} finally {

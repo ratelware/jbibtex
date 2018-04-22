@@ -3,13 +3,22 @@
  */
 package org.jbibtex;
 
+import org.jbibtex.policies.BibTeXEntryKeyConflictResolutionPolicies;
+import org.jbibtex.policies.BibTeXEntryKeyConflictResolutionPolicy;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BibTeXDatabase implements Serializable {
+	BibTeXDatabase() {
+		this(BibTeXEntryKeyConflictResolutionPolicies.IGNORE_SUBSEQUENT);
+	}
+
+	BibTeXDatabase(BibTeXEntryKeyConflictResolutionPolicy policy) {
+		entryMergePolicy = policy;
+	}
+
+	private final BibTeXEntryKeyConflictResolutionPolicy entryMergePolicy;
 
 	private List<BibTeXObject> objects = new ArrayList<>();
 
@@ -37,11 +46,15 @@ public class BibTeXDatabase implements Serializable {
 
 		if(object instanceof BibTeXEntry){
 			BibTeXEntry entry = (BibTeXEntry)object;
+			BibTeXEntry entryToPut = entryMergePolicy.entryToPut(entry, this.entries);
 
-			success = this.entries.putIfMissing(entry.getKey(), entry);
-		} else
-
-		{
+			if(entryToPut != null) {
+				this.entries.put(entryToPut.getKey(), entryToPut);
+				success = true;
+			} else {
+				success = false;
+			}
+		} else {
 			success = true;
 		} // End if
 
