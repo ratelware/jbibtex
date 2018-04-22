@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.util.*;
 
 public class BibTeXDatabase implements Serializable {
-	BibTeXDatabase() {
+	public BibTeXDatabase() {
 		this(BibTeXEntryKeyConflictResolutionPolicies.IGNORE_SUBSEQUENT);
 	}
 
-	BibTeXDatabase(BibTeXEntryKeyConflictResolutionPolicy policy) {
+	public BibTeXDatabase(BibTeXEntryKeyConflictResolutionPolicy policy) {
 		entryMergePolicy = policy;
 	}
 
